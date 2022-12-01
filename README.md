@@ -1,8 +1,6 @@
-# Welcome to your CDK TypeScript project
+# Welcome to CryptoServerless
 
-This is a blank project for CDK development with TypeScript.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+This project defines the AWS infrastructure Cognito, Lambda, and exposes two API Gateways (Auth API and Protected API). 
 
 ## Useful commands
 
