@@ -3,14 +3,18 @@
     "Name": "Crypto-Serverless",
     "Stage": "Crypto-Stage",
     "Account": "841251264913",
-    "Region": "eu-east-1",
+    "Region": "us-east-1",
     "Profile": "crypto-serverless-cdk"
   },
   "Stack": {
     "AuthStack": {
+      "Name": "ServerlessAuthStack",
       "UserPoolName": "UserPool",
-      "AuthAPI": "AuthServiceApi",
-      "ProtectedAPI": "ProtectedApi"
+      "AuthAPIName": "AuthServiceApi",
+      "ProtectedAPIName": "ProtectedApi"
+    },
+    "DBStack": {
+      "Name": "ServerlessDBStack"
     }
   }
 }

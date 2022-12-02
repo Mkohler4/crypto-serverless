@@ -1,9 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import { AppContext } from '../template/app_context';
+import { BaseStack } from '../template/base/base_stack';
 
-export class ServerlessDBStack extends cdk.Stack {
-  constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+export class ServerlessDBStack extends BaseStack {
+  constructor(appContext: AppContext, stackConfig: any) {
+    super(appContext, stackConfig);
 
     const table = new dynamodb.Table(this, 'crypto-table', {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
@@ -11,8 +13,6 @@ export class ServerlessDBStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    new cdk.CfnOutput(this, 'crypto-table-name', {
-      value: table.tableName,
-    });
+    this.putParameter('tableName', table.tableName);
   }
 }
