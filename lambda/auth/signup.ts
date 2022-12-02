@@ -28,7 +28,10 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 		ClientId: process.env.CLIENT_ID!,
 		Username: username,
 		Password: password,
-		UserAttributes: [{ Name: 'email', Value: email }],
+		UserAttributes: [{
+			Name: 'email',
+			Value: email
+		}],
 	};
 
   try {
