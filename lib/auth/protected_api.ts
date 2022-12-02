@@ -1,6 +1,6 @@
 import { Duration } from 'aws-cdk-lib';
 import { RestApi, EndpointType, Cors, AuthorizationType,
-    IdentitySource, LambdaIntegration, RequestAuthorizer,
+    IdentitySource, LambdaIntegration, RequestAuthorizer, JsonSchemaType, RequestValidator,
 } from 'aws-cdk-lib/aws-apigateway';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
@@ -45,6 +45,11 @@ export class ProtectedApi extends Construct {
 			entry: './lambda/auth/authorizer.ts',
 		});
 
+		const post_blog = new NodejsFunction(this, 'PostBlogFn', {
+			...commonFnProps,
+			entry: './lambda/protected/post-blog.ts',
+		});
+
     const requestAuthorizer = new RequestAuthorizer(this, 'RequestAuthorizer', {
 			identitySources: [IdentitySource.header('cookie')],
 			handler: authorizerFn,
@@ -55,5 +60,41 @@ export class ProtectedApi extends Construct {
 			authorizer: requestAuthorizer,
 			authorizationType: AuthorizationType.CUSTOM,
 		});
+
+		// Create model and attach it to method
+    const post_blog_validator = api.addModel('post-blog-validator', {
+      description: "Validates the request body for the POST /blog method",
+      contentType: 'application/json',
+      modelName: 'PostBlogModel',
+      schema: {
+        type: JsonSchemaType.OBJECT,
+        required: ["title", "description"],
+        properties: {
+          title: {
+            type: JsonSchemaType.STRING
+          },
+          description: {
+            type: JsonSchemaType.STRING
+          },
+        },
+    }});
+
+		const blog = protectedRes.addResource('blog');
+		blog.addMethod('POST', new LambdaIntegration(post_blog), {
+			authorizer: requestAuthorizer,
+			authorizationType: AuthorizationType.CUSTOM,
+			requestValidator: new RequestValidator(
+				this,
+        "body-validator",
+        {
+          restApi: api,
+          requestValidatorName: "body-validator",
+          validateRequestBody: true,
+        }
+      ),
+      requestModels: {
+        "application/json": post_blog_validator,
+      },
+		})
   }
 }

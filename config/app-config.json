@@ -1,0 +1,16 @@
+{
+  "Project": {
+    "Name": "Crypto-Serverless",
+    "Stage": "Crypto-Stage",
+    "Account": "841251264913",
+    "Region": "eu-east-1",
+    "Profile": "crypto-serverless-cdk"
+  },
+  "Stack": {
+    "AuthStack": {
+      "UserPoolName": "UserPool",
+      "AuthAPI": "AuthServiceApi",
+      "ProtectedAPI": "ProtectedApi"
+    }
+  }
+}

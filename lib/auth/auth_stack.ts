@@ -8,6 +8,8 @@ export class ServerlessAuthStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+
+
     const userPool = new CognitoUserPool(this, 'UserPool');
 
 		const { userPoolID, userPoolClientID } = userPool;
@@ -21,6 +23,5 @@ export class ServerlessAuthStack extends cdk.Stack {
 			userPoolID,
 			userPoolClientID,
 		});
-
   }
 }
