@@ -94,6 +94,8 @@ export class AppContext {
         let fromType = 'InLine-Argument';
         let configFilePath = this.cdkApp.node.tryGetContext(appConfigKey);
 
+        console.log(configFilePath);
+
         if (configFilePath == undefined) {
             configFilePath = env.get(appConfigKey).asString();
 

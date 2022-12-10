@@ -3,7 +3,6 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ServerlessAuthStack } from '../lib/auth/auth_stack';
 import { AppContext, AppContextError } from '../lib/template/app_context';
-import { ServerlessDBStack } from '../lib/database/dynamo_db';
 
 const app = new cdk.App();
 
@@ -13,9 +12,6 @@ try{
   const appContext = new AppContext({
     appConfigFileKey: 'APP_CONFIG',
   });
-
-  // Database Stack
-  new ServerlessDBStack(appContext, appContext.appConfig.Stack.DBStack);
 
   // Auth Stack
   new ServerlessAuthStack(appContext, appContext.appConfig.Stack.AuthStack);

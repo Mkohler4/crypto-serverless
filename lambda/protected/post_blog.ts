@@ -1,4 +1,5 @@
-// Import dynamodb
+import { CookieMap, createPolicy, parseCookies } from "../utils";
+import * as AWS from "@aws-sdk/client-dynamodb";
 var aws = require('aws-sdk');
 
 type eventBody = { title: string; description: string };
@@ -6,32 +7,74 @@ type eventBody = { title: string; description: string };
 exports.handler = async function (event: any) {
   console.log('[EVENT]', event);
 
+
+  aws.config.update({ region: 'us-east-1'});
+
   // Get event params
   const { title, description }: eventBody = JSON.parse(event.body);
 
+  const cookies: CookieMap = parseCookies(event);
+
+  if (!cookies) {
+
+		console.log('[ERROR] No cookies found');
+
+		return {
+			principalId: '',
+			policyDocument: createPolicy(event, 'Deny'),
+		};
+	}
+
+  const verifiedJwt = cookies.token;
+
   // Get UserID from cognito
-  const userId = event.requestContext.authorizer.claims.sub;
+  const cognito = new aws.CognitoIdentityServiceProvider();
+  const p = {
+    AccessToken: verifiedJwt,
+  };
+  const user = await cognito.getUser(p).promise();
+  const userId = user.Username;
 
-  // Set the region
-  aws.config.update({region: 'REGION'});
+  const ddbClient = new AWS.DynamoDB({ region: 'us-east-1', });
 
-  // Create DynamoDB service object
-  var ddb = new aws.DynamoDB({apiVersion: '2012-08-10'});
+  // Create ddb table from client
+  ddbClient.createTable({
+    TableName: 'Blogs',
+    AttributeDefinitions: [
+      {
+        AttributeName: 'userID',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'title',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'description',
+        AttributeType: 'S'
+      }
+    ],
+    KeySchema: [],
+  });
 
+
+  console.log('[DB-CONFIG]', ddbClient.config);
 
   // Add post to dynamoDB
   const params = {
-    TableName: process.env.POSTS_TABLE!,
+    TableName: "Blogs",
     Item: {
-      id: uuidv4(),
-      userId,
-      title,
-      description,
+      userID: {S: userId},
+      title: {S: title },
+      description: {S: description},
     },
   };
 
+  console.log('[DDB]', params);
+
   try {
-    const res = await ddb.put(params).promise();
+
+    const res = await ddbClient.send(new AWS.PutItemCommand(params));
     console.log('[DYNAMODB]', res);
 
     return {
@@ -50,7 +93,3 @@ exports.handler = async function (event: any) {
     };
   }
 };
-
-function uuidv4() {
-    throw new Error("Function not implemented.");
-  }

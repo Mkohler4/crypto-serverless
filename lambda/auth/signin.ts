@@ -40,7 +40,7 @@ exports.handler = async function (event: APIGatewayProxyEvent): Promise<APIGatew
 			};
 		}
 
-		const token = AuthenticationResult.IdToken;
+		const token = AuthenticationResult.AccessToken;
 
 		return {
 			statusCode: 200,

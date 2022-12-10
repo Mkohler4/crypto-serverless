@@ -4,6 +4,8 @@ import {
 	PolicyDocument,
 	APIGatewayProxyEvent,
 } from 'aws-lambda';
+import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { CognitoAccessTokenPayload } from 'aws-jwt-verify/jwt-model';
 
 const axios = require('axios');
 const jwkToPem = require('jwk-to-pem');
@@ -40,14 +42,17 @@ export const parseCookies = (event: APIGatewayRequestAuthorizerEvent | APIGatewa
 	return cookieMap;
 };
 
-export const verifyToken = async (token: string, userPoolId: string): Promise<JwtToken> => {
+export const verifyToken = async (token: string, userPoolId: string, clientId: string): Promise<CognitoAccessTokenPayload | null> => {
 	try {
-		const url = `https://cognito-idp.us-east-1.amazonaws.com/${userPoolId}/.well-known/jwks.json`;
+		const verifier = CognitoJwtVerifier.create({
+			userPoolId: userPoolId,
+			tokenUse: "access",
+			clientId: clientId,
+		});
 
-		const { data }: { data: Jwk } = await axios.get(url);
-		const pem = jwkToPem(data.keys[0]);
+		// verify jwt and set token claim to access
+		return await verifier.verify(token);
 
-		return jwt.verify(token, pem, { algorithms: ['RS256'] });
 	} catch (err) {
 		console.log(err);
 		return null;

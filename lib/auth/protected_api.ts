@@ -6,16 +6,27 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import { TableViewer } from 'cdk-dynamo-table-viewer';
 
 type ProtectedApiProps = {
 	userPoolID: string;
 	userPoolClientID: string;
-	tableName: string;
 };
 
 export class ProtectedApi extends Construct {
 	constructor(scope: Construct, id: string, props: ProtectedApiProps) {
 		super(scope, id);
+
+		const table = new dynamodb.Table(this, 'crypto-table', {
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    new TableViewer(this, 'crypto-dynamodb', {
+      title: table.tableName,
+      table: table,
+    });
 
     const api = new RestApi(this, 'ProtectedApi', {
 			description: 'Protected RestApi',
@@ -34,6 +45,7 @@ export class ProtectedApi extends Construct {
 			environment: {
 				USER_POOL_ID: props.userPoolID,
 				CLIENT_ID: props.userPoolClientID,
+				TABLE_NAME: 'CRYPTO-SERVERLESSCRYPTO-STAGE-SERVERLESSAUTHSTACK-PROTECTEDAPICRYPTOTABLEC8E18C75-1K0QJWWGTDO0H',
 			},
 		};
 
@@ -49,7 +61,7 @@ export class ProtectedApi extends Construct {
 
 		const post_blog = new NodejsFunction(this, 'PostBlogFn', {
 			...commonFnProps,
-			entry: './lambda/protected/post-blog.ts',
+			entry: './lambda/protected/post_blog.ts',
 		});
 
     const requestAuthorizer = new RequestAuthorizer(this, 'RequestAuthorizer', {

@@ -21,12 +21,9 @@ export class ServerlessAuthStack extends BaseStack {
 			userPoolClientID,
 		});
 
-		const tableName = this.getParameter('tableName');
-
 		new ProtectedApi(this, 'ProtectedApi', {
 			userPoolID,
 			userPoolClientID,
-			tableName
 		});
   }
 }

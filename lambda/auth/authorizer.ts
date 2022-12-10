@@ -16,7 +16,7 @@ exports.handler = async (event: APIGatewayRequestAuthorizerEvent): Promise<APIGa
 		};
 	}
 
-	const verifiedJwt = await verifyToken(cookies.token, process.env.USER_POOL_ID!);
+	const verifiedJwt = await verifyToken(cookies.token, process.env.USER_POOL_ID!, process.env.CLIENT_ID!);
 
 	console.log('[AUTH]', verifiedJwt);
 
